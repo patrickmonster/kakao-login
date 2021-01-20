@@ -95,15 +95,11 @@ const getUserDataAdmin=function(id){
 
 const deleteUserData=function(id){
     var data =  request('POST', 'https://kapi.kakao.com/v1/user/unlink',{
-        headers: {'Authorization':`KakaoAK d9b400e9191ce1bf5a9bb10d34d1b940`},
-        body:''});
+        headers: {'content-type':'application/x-www-form-urlencoded','Authorization':'KakaoAK d9b400e9191ce1bf5a9bb10d34d1b940'},
+        body:`target_id_type=user_id&target_id=${id}`});
     if(data.statusCode!=200){
-      logger.error(`사용자 정보 요청에 실패함 : ${token}`)
-      return false;
-    }
-    data = data.getBody('utf8');
-    logger.info(`${data}`)
-    return JSON.parse(data);// 토큰 데이터(갱신용 데이터)
+      logger.error(`사용자 정보 삭제 요청에 실패함 : ${id}`)
+    }else logger.info(`사용자 정보 삭제 요청에 성공함 : ${id}`)
 }
 
 ///사용자 정보 요청
@@ -135,12 +131,18 @@ app.get('/sucess', (req, res, next) => {
       client.connect();
       client.query(`SELECT * from kakao WHERE user_id=${user_data.id}`,(err,req)=>{
         if(req.rowCount){
+          client.query(`UPDATE user_data SET user_name='${user_data.properties.nickname}', user_img='${user_data.properties.profile_image}' WHERE user_id=${user_data.id}`,(err,req)=>{
+            if(err) logger.error(err)
+          });
           client.query(`UPDATE kakao SET refresh_token='${token.refresh_token}', expires_in=now() WHERE user_id=${user_data.id}`, (err, req)=>{
-            if(err) console.log(err);
+            if(err) logger.error(err);
             logger.info(`사용자 정보 업데이트 ${user_data.id}`)
             client.end();
           });
         }else{
+          client.query(`INSERT INTO user_data (user_name, user_img, user_id) VALUES ('${user_data.properties.nickname}', '${user_data.properties.profile_image}', '${user_data.id}')`,(err,req)=>{
+            if(err) logger.error(err)
+          });
           client.query(`INSERT INTO kakao (refresh_token, expires_in, user_id) VALUES ('${token.refresh_token}',  now() + '${token.refresh_token_expires_in} second', ${user_data.id})`, (err, req)=>{
             if(err) console.log(err);
             logger.info(`신규 사용자 ${user_data.id}`)
@@ -167,8 +169,11 @@ app.get('/create', (req, res, next) => {
   var id = getRandomInt(10,1000000000);
   var client = new Client(DB_kakao);
   client.connect();
+  client.query(`INSERT INTO user_data (user_name, user_img, user_id) VALUES ('임시사용자${id}', 'http://placehold.it/640x640', '${id}')`,(err,req)=>{
+    if(err) logger.error(err);
+  });
   client.query(`INSERT INTO kakao (refresh_token, expires_in, user_id) VALUES ('${token}', now() + '5183999 second', ${id})`, (err, req)=>{
-    if(err) console.log(err);
+    if(err) logger.error(err);
     logger.info(`신규 사용자 (임시) ${id}`)
     client.end();
   });
@@ -185,11 +190,16 @@ app.get('/clear', (req, res, next) => {
   var client = new Client(DB_kakao);
   var id = req.session.user_id;
   client.connect();
+  client.query(`DELETE FROM user_data WHERE  user_id=${id};`,(err,req)=>{
+    if(err) logger.error(err);
+    logger.info(`사용자 정보 파기 ${id}`)
+  });
   client.query(`DELETE FROM kakao WHERE  user_id=${id};`, (err, req)=>{
-    if(err) console.log(err);
+    if(err) logger.error(err);
     logger.info(`사용자를 제거 ${id}`)
     client.end();
   });
+  deleteUserData(id);
   delete req.session.user_data;
   delete req.session.user_id;
   res.end(`<script>window.location.href="/"</script>`)
