@@ -1,8 +1,8 @@
 /* session\app.js */
 const express = require("express");
 const session = require("express-session");
-  const FileStore = require("session-file-store")(session);
-  const { Client } = require("pg");
+const FileStore = require("session-file-store")(session);
+const { Client } = require("pg");
 
 const bodyParser = require("body-parser"); //바디 파서
 const logger = require("./winston"); //로그용
@@ -13,6 +13,7 @@ const app = express();
 const sucessRouter = require("./js/sucess");
 const loginRouter = require("./js/login");
 const userRouter = require("./js/user");
+const setRouter = require("./js/set");
 const db = require("./js/db");
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -34,6 +35,7 @@ app.use(
 // 1Za9aG3ux9liQkTT-GspxXi4LqkV6RIfYVrtXQo9cxgAAAF3Hwl7rw
 
 app.get("/", (req, res, next) => { // 매인화면
+  logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (!req.session.user_data) {
     res.end(`<a href="/login">Login for kakao</a>`);
   } else {
@@ -41,13 +43,16 @@ app.get("/", (req, res, next) => { // 매인화면
   }
 });
 
+//라우터 그룹
 app.get("/sucess", sucessRouter);
-
 //로그인
 app.get("/login", loginRouter);
 app.get('/user', userRouter);
+app.get("/set", setRouter);
+
 //로그아웃
 app.get("/logout", (req, res, next) => {
+  logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (req.session.user_data) {
     delete req.session.user_data; // 사용자 데이터 제거
     logger.info(`사용자 로그아웃 ${req.session.user_id}`);
@@ -57,56 +62,24 @@ app.get("/logout", (req, res, next) => {
 
 //임시 사용자 생성
 app.get("/create", (req, res, next) => {
+  logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (req.query.client !== db.client_id) {
     // 인증된 사용자 인지 여부 확인
-    res.send(
-      `Error<script>setTimeout(()=>{window.location.href='/'},5000)</script>`
-    );
-    res.end();
+    res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
+    res.end(`Error<script>setTimeout(()=>{window.location.href='/'},5000)</script>`);
     return;
   }
-  var {id, token} = db.func.newUser(res); // 사용자 호출
-  res.end(`사용자 생성됨 : ${id}/${token}`);
+  // var {id, token} = ; // 사용자 호출
+  var data = db.func.newUser(res);
+  data.then(d=>{
+    res.end(`사용자 생성됨 : ${d.id} ${d.id, d.token}`);
+  });
 });
 
-// //지정된 사용자로 로그인(임시)
-app.post("/set", (req, res, next) => {
-  logger.info(`사용자 지정 요청:${req.body.user}`);
-  if (req.body.client === client_id && req.body.user) {
-    // 인증된 사용자 인지 여부 확인
-    var client = new Client(DB_kakao);
-    client.connect();
-    client.query(
-      `SELECT * FROM user_data WHERE user_id=${req.body.user}`,
-      (err, req) => {
-        // 임시 사용자 정보를 불러옴
-        if (err) {
-          logger.error(err);
-          res.end(`사용자 DB접근실패`);
-        } else {
-          if (req.rowCount) {
-            req.session.user_id = req.rows.user_id;
-            req.session.user_data = {
-              id: req.rows.user_id,
-              nickname: req.rows.user_name,
-              profile_image: req.rows.user_img,
-            };
-            res.end(`사용자를 지정함!`);
-          } else {
-            res.end(`사용자를 찾을 수 없음`);
-          }
-        }
-        client.end();
-      }
-    );
-  } else {
-    logger.error("사용자의 잘못된 접근");
-    res.end(`<script>window.location.href="/"</script>`);
-  }
-});
 
 // 정보 파기 및 연결 해제
 app.get("/clear", (req, res, next) => {
+  logger.http(`${JSON.stringify(req.headers)} BODY : ${req.body}`);// 헤더 기록
   var client = new Client(db.DB);
   var id = req.session.user_id;
   client.connect();
@@ -120,8 +93,8 @@ app.get("/clear", (req, res, next) => {
     });
   });
   db.func.deleteUserData(id);
-  delete req.session.user_data;
   delete req.session.user_id;
+  delete req.session.user_data;
   res.end(`<script>window.location.href="/"</script>`);
 });
 
