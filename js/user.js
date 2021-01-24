@@ -5,6 +5,7 @@ const logger = require("../winston"); //로그용
 const { Client } = require("pg");
 
 router.get("/user", (req, res) => {
+  logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (
     req.query.hasOwnProperty("client") &&
     req.query.client === db.client_id &&
