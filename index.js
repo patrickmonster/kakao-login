@@ -37,7 +37,7 @@ app.use(
 app.get("/", (req, res, next) => { // 매인화면
   logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (!req.session.user_data) {
-    res.end(`<a href="/login">Login for kakao</a>`);
+    res.end(`<a href="/login?state=kakao">Login for kakao</a><br><a href="/login?state=naver">Login for naver</a>`);
   } else {
     res.sendFile(__dirname + "/index.html");
   }
@@ -74,6 +74,7 @@ app.get("/create", (req, res, next) => {
   data.then(d=>{
     res.end(`사용자 생성됨 : ${d.id} ${d.id, d.token}`);
   });
+
 });
 
 
@@ -83,16 +84,23 @@ app.get("/clear", (req, res, next) => {
   var client = new Client(db.DB);
   var id = req.session.user_id;
   client.connect();
-  client.query(`DELETE FROM user_data WHERE user_id=${id};`, (err, req) => {
+  client.query(`SELECT target, refresh_token FROM kakao WHERE user_id=${id};`, (err,req)=>{// 사용자 데이터 조회
     if (err) logger.error(err);
-    logger.info(`사용자 정보 파기 ${id}`);
-    client.query(`DELETE FROM kakao WHERE user_id=${id};`, (err, req) => {
-      if (err) logger.error(err);
-      logger.info(`사용자를 제거 ${id}`);
-      client.end();
-    });
+    if(req.rowCount){//데이터 존재
+      db.func.deleteUserData(req.rows[0].refresh_token,req.rows[0].target);//
+      client.query(`DELETE FROM user_data WHERE user_id=${id};`, (err, req) => {
+        if (err) logger.error(err);
+        logger.info(`사용자 정보 파기 ${id}`);
+        client.query(`DELETE FROM kakao WHERE user_id=${id};`, (err, req) => {
+          if (err) logger.error(err);
+          logger.info(`사용자를 제거 ${id}`);
+          client.end();
+        });
+      });
+    }else{//데이터 없음
+      logger.info(`사용자 정보가 없음 ${id}`);
+    }
   });
-  db.func.deleteUserData(id);
   delete req.session.user_id;
   delete req.session.user_data;
   res.end(`<script>window.location.href="/"</script>`);
