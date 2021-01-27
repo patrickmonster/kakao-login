@@ -1,3 +1,7 @@
+<meta name="google-signin-client_id" content="308162586887-04dgmkp8toci82on54rojncjdsit3t20.apps.googleusercontent.com">
+<meta name="google-signin-cookiepolicy" content="single_host_origin">
+<meta name="google-signin-scope" content="profile email">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 <script type="text/javascript">
 Element.prototype.createElement=Element.prototype.C=function(ele){var ele=document.createElement(ele);this.appendChild(ele);return ele};
 function ajax(url,f){//호출
@@ -14,6 +18,15 @@ function ajax(url,f){//호출
 	xmlhttp.open("GET",url, true);
 	xmlhttp.send();
 }
+
+function signOut() {
+    try{
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function () {
+        });
+    }catch(e){console.log(e)}
+
+}
 window.onload = function() {
   ajax("/user",function(data){
     data = JSON.parse(data);
@@ -25,5 +38,6 @@ window.onload = function() {
 </script>
 <img id="img" src="" alt="" style="width:80px;height:80px" title="logout"><br>
 <a id=name href="logout"></a><br>
-<a href="clear">연결해제</a>
+<a href="clear" onclick='signOut()'>연결해제</a>
+<div class="g-signin2" style="display:none"></div>
 <!-- <br>Last login :<i id="last_login"></i> -->

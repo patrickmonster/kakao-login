@@ -26,18 +26,10 @@ app.use(
   })
 );
 
-///사용자 정보 요청
-///http://kauth.kakao.com/oauth/authorize?client_id=ffba4150bc6349f8c2c8c415fecee642&redirect_uri=http://localhost:3000/sucess&response_type=code
-
-//https://kauth.kakao.com/oauth/authorize?client_id=5f844bf3c68cccc0a8ff49fc02f33a85&redirect_uri=http://localhost:3000/sucess&response_type=code
-
-// vXJV7iwzunxXeF7HPtW0eZ8NX0yUn1jSLsgA1go9cpcAAAF3Hq86aA
-// 1Za9aG3ux9liQkTT-GspxXi4LqkV6RIfYVrtXQo9cxgAAAF3Hwl7rw
-
 app.get("/", (req, res, next) => { // 매인화면
   logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (!req.session.user_data) {
-    res.end(`<a href="/login?state=kakao">Login for kakao</a><br><a href="/login?state=naver">Login for naver</a>`);
+    res.sendFile(__dirname + "/login.html");
   } else {
     res.sendFile(__dirname + "/index.html");
   }
@@ -69,7 +61,6 @@ app.get("/create", (req, res, next) => {
     res.end(`Error<script>setTimeout(()=>{window.location.href='/'},5000)</script>`);
     return;
   }
-  // var {id, token} = ; // 사용자 호출
   var data = db.func.newUser(res);
   data.then(d=>{
     res.end(`사용자 생성됨 : ${d.id} ${d.id, d.token}`);
@@ -84,14 +75,14 @@ app.get("/clear", (req, res, next) => {
   var client = new Client(db.DB);
   var id = req.session.user_id;
   client.connect();
-  client.query(`SELECT target, refresh_token FROM kakao WHERE user_id=${id};`, (err,req)=>{// 사용자 데이터 조회
+  client.query(`SELECT target, refresh_token FROM kakao WHERE user_id='${id}';`, (err,req)=>{// 사용자 데이터 조회
     if (err) logger.error(err);
-    if(req.rowCount){//데이터 존재
+    else if(req.rowCount){//데이터 존재
       db.func.deleteUserData(req.rows[0].refresh_token,req.rows[0].target);//
-      client.query(`DELETE FROM user_data WHERE user_id=${id};`, (err, req) => {
-        if (err) logger.error(err);
+      client.query(`DELETE FROM user_data WHERE user_id='${id}';`, (err, req) => {
+        if (err) console.log(err);//ger.error(err);
         logger.info(`사용자 정보 파기 ${id}`);
-        client.query(`DELETE FROM kakao WHERE user_id=${id};`, (err, req) => {
+        client.query(`DELETE FROM kakao WHERE user_id='${id}';`, (err, req) => {
           if (err) logger.error(err);
           logger.info(`사용자를 제거 ${id}`);
           client.end();

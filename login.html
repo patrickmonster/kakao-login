@@ -1,0 +1,30 @@
+<meta name="google-signin-client_id" content="308162586887-04dgmkp8toci82on54rojncjdsit3t20.apps.googleusercontent.com">
+<meta name="google-signin-cookiepolicy" content="single_host_origin">
+<meta name="google-signin-scope" content="profile email">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+<script>
+function onSignIn(googleUser) {
+  window.location.href = "/sucess?status=google&token=" + googleUser.getAuthResponse().id_token;// 토큰전송
+}
+</script>
+
+
+<style media="screen">
+.login_form{
+  border: 1px solid black;
+  width: max-content;
+  margin: 10px;
+  padding: 10px;
+}
+</style>
+<div class="login_form">
+  <form class="" action="/" method="post">
+    <input type="email" name="" value="" placeholder="이메일"><br/>
+    <input type="password" name="" value="" placeholder="비밀번호"><br/>
+    <input type="submit" name="" value="사용자 로그인" style="margin-bottom:10px">
+    <button type="button" name="button" style="margin-top: 10px;">회원가입</button>
+  </form>
+  <button type="button" name="button" onclick="location.href='/login?state=kakao'">Kakao Login</button>
+  <button type="button" name="button" onclick="location.href='/login?state=naver'">Naver Login</button>
+  <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark"></div>
+</div>

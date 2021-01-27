@@ -1,8 +1,9 @@
 const express = require('express');
 const { Client } = require("pg");
-const router = express.Router();
+const router = express.Router();``
 const logger = require("../winston"); //로그용
 const db = require('./db');
+const fs = require('fs');
 
 // router.get 으로 사용합니다
 router.get('/login', (req, res, next) => {
@@ -14,11 +15,15 @@ router.get('/login', (req, res, next) => {
   if (!req.session.user_id){
     if(req.query.state=="kakao")
       res.end(`<script>window.location.href="https://kauth.kakao.com/oauth/authorize?client_id=${db.client_id}&redirect_uri=${db.redirect_uri}&response_type=code&state=kakao"</script>`)
-    else //if(req.query.state=="naver")
+    else if(req.query.state=="naver")
       res.end(`<script>window.location.href="https://nid.naver.com/oauth2.0/authorize?client_id=${db.client_id_naver[0]}&response_type=code&redirect_uri=${db.redirect_uri}&state=naver"</script>`)
+    else // 이메일 로그인
+      fs.readFile(__dirname + "/../login.html",(err,data)=>{
+        if(err) return console.error(err);
+        res.end(data,"utf-8");
+      });
+      // res.sendFile();// 구글 로그인
   }else{
-    // var user_data = db.func.getUserDataAdmin(req.session.user_id);
-    //사용자 토큰을 갱신하는 코드
     var client = new Client(db.DB);
     client.connect();
     client.query(`SELECT * FROM kakao WHERE user_id=${req.session.user_id} AND expires_in > now();`, (err, r)=>{ // 사용자 정보를 불러옴

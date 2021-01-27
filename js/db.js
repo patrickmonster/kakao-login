@@ -11,6 +11,16 @@ const DB = {
   port: 5433,
 };
 
+var firebaseConfig = {// 인증키
+  apiKey: "AIzaSyCAE2pw2lrxJlBTyV_DX0wj9jtirv9Ly2E",
+  authDomain: "work-bcf91.firebaseapp.com",
+  projectId: "work-bcf91",
+  storageBucket: "work-bcf91.appspot.com",
+  messagingSenderId: "308162586887",
+  appId: "1:308162586887:web:daf5e1ed06b012fc8c7da2",
+  measurementId: "G-V98N6RVWJZ"
+};
+
 const getRandomInt = (min, max) =>
   Math.floor(Math.random() * (max - min)) + min;
 
@@ -45,6 +55,7 @@ const getToken = function (code,target="kakao") {
 //토큰 갱신
 const refreshToken = function (refresh_token,target="kakao") {
   var data;
+  if(target=="google")return;
   if(target=="kakao")data = request("POST", "https://kauth.kakao.com/oauth/token", {
       headers: {
         "content-type": "application/x-www-form-urlencoded;charset=utf-8",
@@ -66,6 +77,7 @@ const refreshToken = function (refresh_token,target="kakao") {
 };
 //사용자 정보
 const getUserData = function (token,target="kakao"){
+  if(target=="google")return {};
   var data;
   if(target=="kakao")
     data = request("POST", "https://kapi.kakao.com/v2/user/me", {
@@ -110,6 +122,7 @@ const getUserData = function (token,target="kakao"){
 // };
 
 const deleteUserData = function (refresh_token,target="kakao") {
+  if(target=="google")return;
   var data, token = refreshToken(refresh_token,target).access_token;
   if(!token){
     // logger.error(`토큰 갱신에 실패함! ${refresh_token}`)
@@ -154,6 +167,7 @@ module.exports = {
   redirect_uri,
   client_id,
   client_id_naver,
+  firebaseConfig,
   func: {
     deleteUserData,
     getUserData,
