@@ -12,9 +12,24 @@ const app = express();
 
 const sucessRouter = require("./js/sucess");
 const loginRouter = require("./js/login");
+const loginPostRouter = require("./js/loginPOST");
 const userRouter = require("./js/user");
 const setRouter = require("./js/set");
 const db = require("./js/db");
+
+
+var firebase = require('firebase');
+firebase.initializeApp(db.firebaseConfig);
+
+
+
+firebase.auth().onAuthStateChanged((firebaseUser) => {
+  logger.info("사용자 : " + (firebaseUser? firebaseUser.uid : "None"));
+});
+
+// firebase.auth().signInWithRedirect((a,b)=>{
+//   console.log(a,b);
+// })
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(
@@ -29,7 +44,7 @@ app.use(
 app.get("/", (req, res, next) => { // 매인화면
   logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (!req.session.user_data) {
-    res.sendFile(__dirname + "/login.html");
+    res.sendFile(__dirname + (req.session.user_id ? "/login2.html" : "/login.html"));
   } else {
     res.sendFile(__dirname + "/index.html");
   }
@@ -39,6 +54,7 @@ app.get("/", (req, res, next) => { // 매인화면
 app.get("/sucess", sucessRouter);
 //로그인
 app.get("/login", loginRouter);
+app.post('/login',loginPostRouter);
 app.get('/user', userRouter);
 app.get("/set", setRouter);
 
@@ -65,7 +81,6 @@ app.get("/create", (req, res, next) => {
   data.then(d=>{
     res.end(`사용자 생성됨 : ${d.id} ${d.id, d.token}`);
   });
-
 });
 
 
@@ -80,7 +95,7 @@ app.get("/clear", (req, res, next) => {
     else if(req.rowCount){//데이터 존재
       db.func.deleteUserData(req.rows[0].refresh_token,req.rows[0].target);//
       client.query(`DELETE FROM user_data WHERE user_id='${id}';`, (err, req) => {
-        if (err) console.log(err);//ger.error(err);
+        if (err) console.log(err);//logger.error(err);
         logger.info(`사용자 정보 파기 ${id}`);
         client.query(`DELETE FROM kakao WHERE user_id='${id}';`, (err, req) => {
           if (err) logger.error(err);

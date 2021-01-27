@@ -4,10 +4,14 @@
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 <script>
 function onSignIn(googleUser) {
+  try{// 토큰 발급후, 구글 자동로인 해제
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+      });
+  }catch(e){console.log(e)}
   window.location.href = "/sucess?status=google&token=" + googleUser.getAuthResponse().id_token;// 토큰전송
 }
 </script>
-
 
 <style media="screen">
 .login_form{
@@ -18,10 +22,10 @@ function onSignIn(googleUser) {
 }
 </style>
 <div class="login_form">
-  <form class="" action="/" method="post">
-    <input type="email" name="" value="" placeholder="이메일"><br/>
-    <input type="password" name="" value="" placeholder="비밀번호"><br/>
-    <input type="submit" name="" value="사용자 로그인" style="margin-bottom:10px">
+  <form class="" action="/login" method="post">
+    <input type="email" name="email" value="" placeholder="이메일" /><br/>
+    <input type="password" name="password" value="" placeholder="비밀번호" /><br/>
+    <input type="submit" name="submit" value="사용자 로그인" style="margin-bottom:10px" />
     <button type="button" name="button" style="margin-top: 10px;">회원가입</button>
   </form>
   <button type="button" name="button" onclick="location.href='/login?state=kakao'">Kakao Login</button>

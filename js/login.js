@@ -5,6 +5,7 @@ const logger = require("../winston"); //로그용
 const db = require('./db');
 const fs = require('fs');
 
+
 // router.get 으로 사용합니다
 router.get('/login', (req, res, next) => {
   if(req.query.hasOwnProperty("user") && req.query.hasOwnProperty("client") && req.query.client === db.client_id){
@@ -26,11 +27,11 @@ router.get('/login', (req, res, next) => {
   }else{
     var client = new Client(db.DB);
     client.connect();
-    client.query(`SELECT * FROM kakao WHERE user_id=${req.session.user_id} AND expires_in > now();`, (err, r)=>{ // 사용자 정보를 불러옴
+    client.query(`SELECT * FROM kakao WHERE user_id='${req.session.user_id}' AND expires_in > now();`, (err, r)=>{ // 사용자 정보를 불러옴
       if(err) logger.error(err);
-      if(r.rowCount){//존재하는 사용자
-        client.query(`SELECT * FROM user_data WHERE user_id=${req.session.user_id}`, (err, r)=>{ // 사용자 정보를 불러옴
-          req.session.user_data = {id:r.rows[0].user_id,nickname:r.rows[0].user_name,profile_image:r.rows[0].user_img};
+      else if(r.rowCount){//존재하는 사용자
+        client.query(`SELECT * FROM user_data WHERE user_id='${req.session.user_id}'`, (err, r)=>{ // 사용자 정보를 불러옴
+          req.session.user_data = {id:""+r.rows[0].user_id,nickname:r.rows[0].user_name,profile_image:r.rows[0].user_img};
           logger.info(`사용자 로그인 ${req.session.user_id}`)
           res.end(`<script>window.location.href='/'</script>`)
         });

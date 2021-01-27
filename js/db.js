@@ -122,7 +122,14 @@ const getUserData = function (token,target="kakao"){
 // };
 
 const deleteUserData = function (refresh_token,target="kakao") {
-  if(target=="google")return;
+  if(target=="google"){
+    var user = require('firebase').auth().currentUser;
+    if(!user)return;
+    user.delete().catch(function(error){
+      logger.error(error);
+    });
+    return;
+  }
   var data, token = refreshToken(refresh_token,target).access_token;
   if(!token){
     // logger.error(`토큰 갱신에 실패함! ${refresh_token}`)
@@ -162,6 +169,35 @@ const newUser = async function (reqs) {
   return { id:id, token:token };
 };
 
+function addUser(uid, token,time, nickname,img,target){
+  var client = new Client(DB);
+  client.connect();
+  client.query(`SELECT * from kakao WHERE user_id='${uid}'`,(err, req) => {
+      if(err)console.log(err);
+      else if (req.rowCount) {
+        client.query(`UPDATE user_data SET user_name='${nickname}', user_img='${img}' WHERE user_id='${uid}'`,(err, req) => {
+            if (err) logger.error(err);
+            client.query(`UPDATE kakao SET refresh_token='${token}', expires_in=now() + '${time} second' WHERE user_id='${uid}'`,(err, req) => {
+                if (err) logger.error(err);
+                logger.info(`사용자 정보 업데이트 ${uid}`);
+                client.end();
+              });// query
+          });// query
+      } else {
+        client.query(`INSERT INTO user_data (user_name, user_img, user_id) VALUES ('${nickname || "닉네임이 지정되지 않음"}', '${img || "http://placehold.it/640x640"}', '${uid}')`,(err, req) => {
+            if (err) logger.error(err);
+            client.query(`INSERT INTO kakao (refresh_token, expires_in, user_id, target) VALUES ('${token}',  now() + '${time} second', '${uid}', '${target}')`,(err, req) => {
+                if (err) console.log(err);
+                logger.info(`신규 사용자 ${uid} by ${target}?`);
+                client.end();
+              });//query
+          });// query
+      }//else
+      /// 사용자 정보를 DB에 저장
+    }
+  );
+}
+
 module.exports = {
   DB,
   redirect_uri,
@@ -176,5 +212,6 @@ module.exports = {
     getToken,
     newUser,
     getRandomInt,
+    addUser,
   },
 };
