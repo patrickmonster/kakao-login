@@ -83,6 +83,16 @@ app.get("/create", (req, res, next) => {
   });
 });
 
+app.get("/img", (req, res, next) => {
+  // res.writeHead(200, {'Content-Type':'image/png'});
+  if(req.query.src=="naver"){
+    res.sendFile(__dirname + "/image/naver_login.png")
+  }else if(req.query.src=="kakao"){
+    res.sendFile(__dirname + "/image/kakao_login.png")
+  }else {
+    res.sendFile(__dirname + "/image/none.png")
+  }
+});
 
 // 정보 파기 및 연결 해제
 app.get("/clear", (req, res, next) => {
