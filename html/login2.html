@@ -1,0 +1,19 @@
+<script>
+</script>
+<style media="screen">
+.login_form{
+  border: 1px solid black;
+  width: max-content;
+  margin: 10px;
+  padding: 10px;
+}
+</style>
+<div class="login_form">
+  <form class="" action="/login" method="post">
+    <input type="email" name="email" value="" placeholder="이메일" /><br/>
+    <input type="password" name="password" value="" placeholder="비밀번호" /><br/>
+    <input type="submit" name="submit" value="사용자 로그인" style="margin-bottom:10px" />
+    <button type="button" name="button" style="margin-top: 10px;" onclick="window.location.href='/create'">회원가입</button>
+  </form>
+  <button type="button" name="button" onclick="location.href='/login'">세션 로그인</button>
+</div>

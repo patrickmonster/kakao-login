@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("./db");
-const logger = require("../winston"); //로그용
+const logger = require("./winston"); //로그용
 const { Client } = require("pg");
 // //지정된 사용자로 로그인(임시)
 

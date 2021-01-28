@@ -1,7 +1,7 @@
 const express = require('express');
 const { Client } = require("pg");
 const router = express.Router();``
-const logger = require("../winston"); //로그용
+const logger = require("./winston"); //로그용
 const db = require('./db');
 const fs = require('fs');
 

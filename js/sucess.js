@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("./db");
 const { Client } = require("pg");
-const logger = require("../winston"); //로그용
+const logger = require("./winston"); //로그용
 
 var firebase = require('firebase');
 // firebase.initializeApp(db.firebaseConfig);

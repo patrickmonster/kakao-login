@@ -1,6 +1,6 @@
 const { Client } = require("pg");
 const request = require("sync-request");
-const logger = require("../winston");
+const logger = require("./winston");
 
 //데이터베이스용
 const DB = {
@@ -184,7 +184,7 @@ function addUser(uid, token,time, nickname,img,target){
               });// query
           });// query
       } else {
-        client.query(`INSERT INTO user_data (user_name, user_img, user_id) VALUES ('${nickname || "닉네임이 지정되지 않음"}', '${img || "http://placehold.it/640x640"}', '${uid}')`,(err, req) => {
+        client.query(`INSERT INTO user_data (user_name, user_img, user_id) VALUES ('${nickname || "닉네임이 지정되지 않음``"}', '${img || "http://placehold.it/640x640"}', '${uid}')`,(err, req) => {
             if (err) logger.error(err);
             client.query(`INSERT INTO kakao (refresh_token, expires_in, user_id, target) VALUES ('${token}',  now() + '${time} second', '${uid}', '${target}')`,(err, req) => {
                 if (err) console.log(err);

@@ -1,0 +1,28 @@
+<script type="text/javascript">
+Element.prototype.createElement=Element.prototype.C=function(ele){var ele=document.createElement(ele);this.appendChild(ele);return ele};
+function ajax(url,f){//호출
+	var xmlhttp;
+	if(window.XMLHttpRequest)
+		xmlhttp=new XMLHttpRequest();
+	else xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+			//item(JSON.parse(this.responseText),tap);
+			typeof f=='function'&&f(this.responseText);
+		}
+	};
+	xmlhttp.open("GET",url, true);
+	xmlhttp.send();
+}
+
+window.onload = function() {
+  ajax("/user",function(data){
+    data = JSON.parse(data);
+    document.getElementById("img").src = data.profile_image;
+    document.getElementById("name").innerHTML = data.nickname
+  })
+}
+</script>
+<img id="img" src="" alt="" style="width:80px;height:80px" title="logout"><br>
+<a id=name href="logout"></a><br>
+<a href="clear">연결해제</a>

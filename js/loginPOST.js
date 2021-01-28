@@ -1,7 +1,7 @@
 const express = require('express');
 const { Client } = require("pg");
 const router = express.Router();
-const logger = require("../winston"); //로그용
+const logger = require("./winston"); //로그용
 const db = require('./db');
 var firebase = require('firebase');
 
@@ -27,6 +27,7 @@ router.post('/login', (req, res, next) => {
       });
       // res.end(`?`)//정상적인 로그인
   }else{
+    console.log(req.body);
     res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
     res.end(`<script>alert("비밀번호가 공백입니다!");window.location.href="/"</script>`);
   }
