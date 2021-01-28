@@ -21,7 +21,7 @@ router.get('/login', (req, res, next) => {
     else // 이메일 로그인
       fs.readFile(__dirname + "/../login.html",(err,data)=>{
         if(err) return console.error(err);
-        res.end(data,"utf-8");
+        else res.end(data,"utf-8");
       });
       // res.sendFile();// 구글 로그인
   }else{
