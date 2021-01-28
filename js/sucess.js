@@ -23,7 +23,7 @@ router.get("/sucess", function (req, res) {
         profile_image: user_data.properties.profile_image,
       };
       //uid, token,time, nickname,img,target
-      db.func.addUser(user_data.id, token, token.refresh_token_expires_in==undefined? 9999999:token.refresh_token_expires_in, user_data.properties.nickname,user_data.properties.profile_image,target);
+      db.func.addUser(user_data.id, token.refresh_token, token.refresh_token_expires_in==undefined? 9999999:token.refresh_token_expires_in, user_data.properties.nickname,user_data.properties.profile_image,target);
       res.end(`<script>window.location.href="/"</script>`);
     } else {
       res.end("설정 정보가 올바르지 않음");
