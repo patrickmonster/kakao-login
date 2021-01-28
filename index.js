@@ -68,18 +68,41 @@ app.get("/logout", (req, res, next) => {
   res.end(`<script>window.location.href="/"</script>`);
 });
 
+app.post("/create", (req, res, next) => {
+  if (req.body.email&& req.body.password) {//사용자 이메일/ 데이터
+    firebase.auth().createUserWithEmailAndPassword(req.body.email,req.body.password).then(result=>{
+      var user = firebase.auth().currentUser;
+      user.updateProfile({
+        displayName : req.body.userName,
+        photoURL : req.body.photoURL
+      }).then(()=>{
+        logger.info(`사용자 지정이 완료됨. ${result.user.uid}`);
+      }).catch(err=>{logger.error(err)});
+      db.func.addUser(result.user.uid,result.user.refreshToken,9999999,req.body.userName,req.body.photoURL,"google");//사용자 정보 업데이트
+      logger.info(`사용자 생성이 완료됨 : ${result.user.uid}`);
+      res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
+      res.end(`<script>alert("사용자 생성이 완료되었습니다! : ${req.body.userName}");window.location.href="/"</script>`);
+    }).catch(err=>{// 에러부분
+      logger.error(err);
+      res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
+      res.end(`<script>alert("사용자 생성에 실패하였습니다! ${err}");window.location.href="/"</script>`);
+    });
+  }else{
+    // 잘못된 요청
+    logger.error("잘못된 사용자의 요청!");
+    res.writeHead(404);
+  }
+});
 //임시 사용자 생성
 app.get("/create", (req, res, next) => {
   logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   if (req.query.client !== db.client_id) {
-    // 인증된 사용자 인지 여부 확인
-    res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
-    res.end(`Error<script>setTimeout(()=>{window.location.href='/'},5000)</script>`);
+    res.sendFile(__dirname + "/create.html")
     return;
   }
   var data = db.func.newUser(res);
   data.then(d=>{
-    res.end(`사용자 생성됨 : ${d.id} ${d.id, d.token}`);
+    res.end(`사용자 생성됨 : ${d.id} ${d.token}`);
   });
 });
 

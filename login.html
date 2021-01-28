@@ -26,9 +26,9 @@ function onSignIn(googleUser) {
     <input type="email" name="email" value="" placeholder="이메일" /><br/>
     <input type="password" name="password" value="" placeholder="비밀번호" /><br/>
     <input type="submit" name="submit" value="사용자 로그인" style="margin-bottom:10px" />
-    <button type="button" name="button" style="margin-top: 10px;">회원가입</button>
+    <button type="button" name="button" style="margin-top: 10px;" onclick="window.location.href='/create'">회원가입</button>
   </form>
-  <img src="/img?src=naver" alt="네이버로 로그인" onclick="location.href='/login?state=kakao'" style="cursor:pointer;width:80px">
-  <img src="/img?src=kakao" alt="카카오로 로그인" onclick="location.href='/login?state=naver'" style="cursor:pointer;width:130px">
+  <img src="/img?src=naver" alt="네이버로 로그인" onclick="location.href='/login?state=naver'" style="cursor:pointer;width:80px">
+  <img src="/img?src=kakao" alt="카카오로 로그인" onclick="location.href='/login?state=kakao'" style="cursor:pointer;width:130px">
   <div class="g-signin2" data-onsuccess="onSignIn" data-theme="dark" style="margin-top:10;"></div>
 </div>
