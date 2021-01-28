@@ -24,7 +24,7 @@ router.post("/create", (req, res, next) => {
       logger.error(err);
       res.writeHead(200, {'Content-Type':'text/html; charset=utf-8'});
       res.end(`<script>alert("사용자 생성에 실패하였습니다! ${err}");window.location.href="/"</script>`);
-    });
+    });a
   }else{
     // 잘못된 요청
     logger.error("잘못된 사용자의 요청!");

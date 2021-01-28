@@ -147,27 +147,27 @@ const deleteUserData = function (refresh_token,target="kakao") {
   } else logger.info(`사용자 정보 삭제 요청에 성공함 : ${token}`);
 };
 
-const newUser = async function (reqs) {
-  var token = Math.random().toString(36).substr(2, 11);
-  var id = getRandomInt(10, 1000000000);
-  var client = new Client(DB);
-  client.connect();
-  client.query(
-    `INSERT INTO user_data (user_name, user_img, user_id) VALUES ('임시사용자${id}', 'http://placehold.it/640x640', '${id}')`,
-    (err, req) => {
-      if (err) logger.error(err);
-      client.query(
-        `INSERT INTO kakao (refresh_token, expires_in, user_id) VALUES ('${token}', now() + '5183999 second', ${id})`,
-        (err, req) => {
-          if (err) logger.error(err);
-          logger.info(`신규 사용자 (임시) ${id}`);
-          client.end();
-        }
-      );
-    }
-  );
-  return { id:id, token:token };
-};
+// const newUser = async function (reqs) {
+//   var token = Math.random().toString(36).substr(2, 11);
+//   var id = getRandomInt(10, 1000000000);
+//   var client = new Client(DB);
+//   client.connect();
+//   client.query(
+//     `INSERT INTO user_data (user_name, user_img, user_id) VALUES ('임시사용자${id}', 'http://placehold.it/640x640', '${id}')`,
+//     (err, req) => {
+//       if (err) logger.error(err);
+//       client.query(
+//         `INSERT INTO kakao (refresh_token, expires_in, user_id) VALUES ('${token}', now() + '5183999 second', ${id})`,
+//         (err, req) => {
+//           if (err) logger.error(err);
+//           logger.info(`신규 사용자 (임시) ${id}`);
+//           client.end();
+//         }
+//       );
+//     }
+//   );
+//   return { id:id, token:token };
+// };
 
 function addUser(uid, token,time, nickname,img,target){
   var client = new Client(DB);
@@ -210,7 +210,7 @@ module.exports = {
     // getUserDataAdmin,
     refreshToken,
     getToken,
-    newUser,
+    // newUser,
     getRandomInt,
     addUser,
   },

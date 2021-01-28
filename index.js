@@ -58,7 +58,7 @@ app.get("/login", loginRouter);
 app.post('/login',loginPostRouter);
 app.get("/logout",logoutRouter);
 app.get('/user', userRouter);
-app.get("/set", setRouter);
+// app.get("/set", setRouter);
 
 // 정보 파기 및 연결 해제
 app.get("/clear",clearRouter);

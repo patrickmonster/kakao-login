@@ -8,11 +8,11 @@ const fs = require('fs');
 
 // router.get 으로 사용합니다
 router.get('/login', (req, res, next) => {
-  if(req.query.hasOwnProperty("user") && req.query.hasOwnProperty("client") && req.query.client === db.client_id){
-    req.session.user_id = req.query.user;
-    res.end("<script>window.location.href='/login'</script>");
-    return;
-  }
+  // if(req.query.hasOwnProperty("user") && req.query.hasOwnProperty("client") && req.query.client === db.client_id){
+  //   req.session.user_id = req.query.user;
+  //   res.end("<script>window.location.href='/login'</script>");
+  //   return;
+  // }
   if (!req.session.user_id){
     if(req.query.state=="kakao")
       res.end(`<script>window.location.href="https://kauth.kakao.com/oauth/authorize?client_id=${db.client_id}&redirect_uri=${db.redirect_uri}&response_type=code&state=kakao"</script>`)
