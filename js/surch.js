@@ -38,10 +38,11 @@ router.post("/search", (req, res, next) => {
         var data = response.data;// 리턴 데이터
         var ids = [];
         for (var i in data)if(data[i].word_id)ids.push(data[i].word_id);
-        // var qury = {};
-        // var ids = [];
-        // for (var i in data)if(data[i].word_id && !qury[data[i].text])qury[data[i].text] = data[i].word_id;// 단어 중복제거 /
-        // for (var i in qury)ids.push(qury[i]);
+        if(!ids.length){
+          res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
+          res.end(JSON.stringify([{'lxper_word_id':'0','단어':'Null','국문뜻':'찾지못함','영문뜻':'Null'}]));
+          return;
+        }
         logger.info(`사용자 요청 데이터 : ${ids.join(",")}`);
         var client = new Client(DB);
         client.connect();
@@ -50,7 +51,8 @@ router.post("/search", (req, res, next) => {
             res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
             if (err) {
               logger.error(err);
-              res.end("[{'lxper_word_id':'0','단어:'Null','국문뜻':'찾지못함','영문뜻':'Null'}]");
+              res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
+              res.end(JSON.stringify([{'lxper_word_id':'0','단어':'Null','국문뜻':'찾지못함','영문뜻':'Null'}]));
             }else{
               for (var i in req.rows){
                 var word = req.rows[i];
