@@ -4,7 +4,6 @@ const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 const { Client } = require("pg");
 
-const bodyParser = require("body-parser"); //바디 파서
 const logger = require("./js/winston"); //로그용
 
 require("date-utils");
@@ -20,6 +19,8 @@ const createRouter = require("./js/create");
 const clearRouter = require("./js/clear");
 const db = require("./js/db");
 
+const surchRouter = require("./js/surch");
+
 
 var firebase = require('firebase');
 firebase.initializeApp(db.firebaseConfig);
@@ -28,11 +29,7 @@ firebase.auth().onAuthStateChanged((firebaseUser) => {//파이어베이스
   logger.info("사용자 : " + (firebaseUser? firebaseUser.uid : "None"));
 });
 
-// firebase.auth().signInWithRedirect((a,b)=>{
-//   console.log(a,b);
-// })
-
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
 app.use(
   session({
     secret: "test lxper",
@@ -58,6 +55,8 @@ app.get("/login", loginRouter);
 app.post('/login',loginPostRouter);
 app.get("/logout",logoutRouter);
 app.get('/user', userRouter);
+
+app.post("/search", surchRouter);
 // app.get("/set", setRouter);
 
 // 정보 파기 및 연결 해제

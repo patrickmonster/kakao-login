@@ -1,28 +1,59 @@
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script type="text/javascript">
 Element.prototype.createElement=Element.prototype.C=function(ele){var ele=document.createElement(ele);this.appendChild(ele);return ele};
-function ajax(url,f){//호출
-	var xmlhttp;
-	if(window.XMLHttpRequest)
-		xmlhttp=new XMLHttpRequest();
-	else xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	xmlhttp.onreadystatechange = function() {
-		if (this.readyState == 4 && this.status == 200) {
-			//item(JSON.parse(this.responseText),tap);
-			typeof f=='function'&&f(this.responseText);
-		}
-	};
-	xmlhttp.open("GET",url, true);
-	xmlhttp.send();
-}
 
 window.onload = function() {
-  ajax("/user",function(data){
-    data = JSON.parse(data);
-    document.getElementById("img").src = data.profile_image;
-    document.getElementById("name").innerHTML = data.nickname
-  })
+	console.log();
+	axios.get("/user").then(function(data){
+    document.getElementById("img").src = data.data.profile_image;
+    document.getElementById("name").innerHTML = data.data.nickname;
+		document.getElementById("surch_id").value = data.data.id;
+	});
 }
 </script>
 <img id="img" src="" alt="" style="width:80px;height:80px" title="logout"><br>
 <a id=name href="logout"></a><br>
 <a href="clear">연결해제</a>
+
+<br>
+<!-- 사용자 문서 검색을 담당함 -->
+<textarea id="surch_data" name="data" rows="8" cols="80" autofocus placeholder="불러올 영단어를 작성해 주세요"></textarea>
+<input id="surch_id" type="hidden" name="id" value="0">
+<button type="button" name="" onclick="surch_data()">검색</button><br>
+<div id="output">
+
+</div>
+<script type="text/javascript">
+//사용자 정보 요청을 수신함
+function surch_data(){
+	var data = document.getElementById("surch_data").value;
+	var id =  document.getElementById("surch_id").value;// 사용자 인증키
+
+	if(!id && !data){
+		alert(id ?"검색 문장이 없습니다!" : "올바른 접근 방식이 아닙니다!");
+		return;
+	}
+	axios({
+		method: "post",
+		url: "/search",
+		data:{id,data}
+	}).then(function(response){
+		console.log(response.data);
+		responseWords(response.data)
+	});
+}
+
+function responseWords(data){
+	var div = document.getElementById("output");// 매인패널
+	div.innerHTML="";
+	for(var i in data){// 번역데이터
+		var section = div.C("section");
+		section.id = "W_"+data[i].lxper_word_id;
+		section.C("h3").innerHTML = data[i]["단어"];
+		section.C("h5").innerHTML = data[i]["국문뜻"];
+		if(data[i]["영문뜻"])section.C("div").innerHTML = data[i]["영문뜻"].replaceAll("\\n","<br>");
+	}
+
+}
+
+</script>
