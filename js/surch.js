@@ -50,7 +50,7 @@ router.post("/search", (req, res, next) => {
             res.writeHead(200, {'Content-Type':'application/json; charset=utf-8'});
             if (err) {
               logger.error(err);
-              res.end("{'Error':'Error'}");
+              res.end("[{'lxper_word_id':'0','단어:'Null','국문뜻':'찾지못함','영문뜻':'Null'}]");
             }else{
               for (var i in req.rows){
                 var word = req.rows[i];
