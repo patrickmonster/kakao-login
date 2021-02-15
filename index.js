@@ -2,25 +2,23 @@
 const express = require("express");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
-const { Client } = require("pg");
+
+const helmet = require("helmet");
 
 const logger = require("./js/winston"); //로그용
 
-require("date-utils");
 const app = express();
 
-const sucessRouter = require("./js/sucess");
-const loginRouter = require("./js/login");
-const loginPostRouter = require("./js/loginPOST");
-const logoutRouter = require("./js/logout");
-const userRouter = require("./js/user");
-const setRouter = require("./js/set");
-const createRouter = require("./js/create");
-const clearRouter = require("./js/clear");
-const db = require("./js/db");
+app.use(express.json());
+app.use(express.urlencoded({extended:false}));
+app.disable("x-powered-by");// Express 사용정보 숨기기
+app.use(helmet.frameguard("SAMEORIGIN"));//ifram 사용 호출 제한
+app.use(helmet.noSniff()); // 파일 형식 추측 제한
 
-const surchRouter = require("./js/surch");
 
+const passportRouter = require("./js/passport") // 사용자 인증 관련
+const db = require("./js/db"); // 디비 / 사용자 API
+const loadRouter = require("./js/content/load");// 단어 검색 / 문장 검색
 
 var firebase = require('firebase');
 firebase.initializeApp(db.firebaseConfig);
@@ -29,8 +27,8 @@ firebase.auth().onAuthStateChanged((firebaseUser) => {//파이어베이스
   logger.info("사용자 : " + (firebaseUser? firebaseUser.uid : "None"));
 });
 
-app.use(express.json());
-app.use(
+app.use(express.json()); // 바디파서
+app.use( // 세션 스토어
   session({
     secret: "test lxper",
     resave: false,
@@ -48,42 +46,30 @@ app.get("/", (req, res, next) => { // 매인화면
   }
 });
 
-//라우터 그룹
-app.get("/sucess", sucessRouter);
-//로그인
-app.get("/login", loginRouter);
-app.post('/login',loginPostRouter);
-app.get("/logout",logoutRouter);
-app.get('/user', userRouter);
 
-app.post("/search", surchRouter);
-// app.get("/set", setRouter);
+// 사용자 인증
+app.use("/", passportRouter); // 사용자 인증 관련
+app.use('/',loadRouter);// 단어검색
 
-// 정보 파기 및 연결 해제
-app.get("/clear",clearRouter);
-app.post("/create", createRouter);
-//임시 사용자 생성
+//사용자 생성
 app.get("/create", (req, res, next) => {
   logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
-  if (req.query.client !== db.client_id) {
-    res.sendFile(__dirname + "/html/create.html")
-    return;
-  }
+  if (req.query.client !== db.client_id)
+    return res.sendFile(__dirname + "/html/create.html");
   var data = db.func.newUser(res);
   data.then(d=>{
     res.end(`사용자 생성됨 : ${d.id} ${d.token}`);
   });
 });
 
+// 사용자 정보 취득
+// 기본 이미지 취득
 app.get("/img", (req, res, next) => {
-  // res.writeHead(200, {'Content-Type':'image/png'});
   if(req.query.src=="naver"){
-    res.sendFile(__dirname + "/image/naver_login.png")
+    res.sendFile(__dirname + "/image/naver_login.png");
   }else if(req.query.src=="kakao"){
-    res.sendFile(__dirname + "/image/kakao_login.png")
-  }else {
-    res.sendFile(__dirname + "/image/none.png")
-  }
+    res.sendFile(__dirname + "/image/kakao_login.png");
+  }else res.sendFile(__dirname + "/image/none.png");
 });
 
 

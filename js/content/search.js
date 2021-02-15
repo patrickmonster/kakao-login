@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const logger = require("./winston");
+const logger = require("../winston");
 
 const axios = require("axios");
 const { Client } = require("pg");
@@ -23,7 +23,6 @@ const changeObjectEleName=function(obj,oldName,newName){
   delete obj[oldName];
   return obj;
 }
-//사용자 검색
 const regExp = /[\{\}\[\]\/?.,;:|\)*~`!^\-+<>@\#$%&\\\=\(\'\"]/gi;
 router.post("/search", (req, res, next) => {
   if(req.body.id && req.body.data && req.body.id == req.session.user_id){
@@ -69,7 +68,7 @@ router.post("/search", (req, res, next) => {
       }
     }).catch(function(err){
       logger.error(err);
-
+      res.writeHead(404);
     });
   }else{
     res.writeHead(404);
