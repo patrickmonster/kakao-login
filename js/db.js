@@ -4,6 +4,8 @@ const { Client } = require("pg");
 const axios = require("axios");
 const logger = require("./winston");
 
+const { v4: uuidv4 } = require('uuid');
+
 //데이터베이스용
 const DB = {
   user: "postgres",
@@ -23,11 +25,10 @@ var firebaseConfig = {// 인증키
   measurementId: "G-V98N6RVWJZ"
 };
 
-const getRandomInt = (min, max) =>
-  Math.floor(Math.random() * (max - min)) + min;
+const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 
 const redirect_uri = "http://localhost:3000/sucess";
-const client_id = "5f844bf3c68cccc0a8ff49fc02f33a85";
+const client_id = "5f844bf3c68cccc0a8ff49fc02f33a85";// 카카오용 클라이언트 아이디
 const client_id_naver = ["wgH_1N2huKWM4R5qsFmP","pFErraLHnE"];//클라이언트 아이디 / 비밀코드
 
 /*
@@ -52,12 +53,14 @@ async function callDB(db,query,func,callLimit=10){
       if(!nextQuery)break;// 문제의 쿼리를 처리하지 않는 경우
     }
     if(typeof func === "function")
-      nextQuery = await func(call++,callbackData); // 다음쿼리를 준비
+      nextQuery = await func(call++,(callbackData && callbackData.length)?callbackData:undefined); // 다음쿼리를 준비
     else nextQuery = false;
   }while(call <= callLimit && nextQuery);// 호출횟수가 넘거나, 다음쿼리가 없을때
 
   client.end();// 디비연결 해제
-  return callbackData;
+  if(callbackData && callbackData.length)
+    return callbackData;
+  else return false;
 }
 
 /*
@@ -163,14 +166,15 @@ const deleteUserData = async function (refresh_token,target="kakao") {
 
 // 신규유저는 추가하고/ 기존유저는 업데이트
 async function addUser(uid, token,time, nickname,img,target){
+  const uuid = uuidv4();
   const query = await callDB(DB, `SELECT * from kakao WHERE user_id='${uid}'`,(index,data)=>{
     if(index==0){
-      if(data.rowCount)
-        return `UPDATE user_data SET user_name='${nickname}', user_img='${img}' WHERE user_id='${uid}';UPDATE kakao SET refresh_token='${token}', expires_in=now() + '${time} second' WHERE user_id='${uid}';`;
-      else return `INSERT INTO user_data (user_name, user_img, user_id) VALUES ('${nickname || "닉네임이 지정되지 않음``"}', '${img || "http://placehold.it/640x640"}', '${uid}');INSERT INTO kakao (refresh_token, expires_in, user_id, target) VALUES ('${token}',  now() + '${time} second', '${uid}', '${target}')`;
+      if(data && data.length)
+        return `UPDATE user_data SET user_uuid='${uuid}', user_name='${nickname}', user_img='${img}' WHERE user_id='${uid}';UPDATE kakao SET refresh_token='${token}', user_uuid='${uuid}', expires_in=now() + '${time} second' WHERE user_id='${uid}';`;
+      else return `INSERT INTO user_data (user_name, user_img, user_id,user_uuid) VALUES ('${nickname || "닉네임이 지정되지 않음"}', '${img || "http://placehold.it/640x640"}', '${uid}', '${uuid}');INSERT INTO kakao (refresh_token, expires_in, user_id, target,user_uuid) VALUES ('${token}',  now() + '${time} second', '${uid}', '${target}','${uuid}')`;
     }else return false; // 다른쿼리는 처리하지 않음
   });
-  return query;
+  return uuid;
 }
 
 module.exports = {

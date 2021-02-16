@@ -3,7 +3,6 @@
 Element.prototype.createElement=Element.prototype.C=function(ele){var ele=document.createElement(ele);this.appendChild(ele);return ele};
 
 window.onload = function() {
-	console.log();
 	axios.get("/user").then(function(data){
     document.getElementById("img").src = data.data.profile_image;
     document.getElementById("name").innerHTML = data.data.nickname;
