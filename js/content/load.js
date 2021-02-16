@@ -40,7 +40,7 @@ router.get("/load", (req, res, next) => {
 
 // 사용자 단어 검색
 router.post("/search", (req, res, next) => {
-  if(req.body.id && req.body.data && req.body.id == req.session.user_id){
+  if(req.body.id && req.body.data){
     var content = req.body.data.replace(regExp,"");
   	axios({
   		method: "post",
