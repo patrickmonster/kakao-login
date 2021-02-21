@@ -27,7 +27,7 @@ var firebaseConfig = {// 인증키
 
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min)) + min;
 
-const redirect_uri = "http://localhost:3000/sucess";
+const redirect_uri = "http://patrickmonster.site/sucess";
 const client_id = "5f844bf3c68cccc0a8ff49fc02f33a85";// 카카오용 클라이언트 아이디
 const client_id_naver = ["wgH_1N2huKWM4R5qsFmP","pFErraLHnE"];//클라이언트 아이디 / 비밀코드
 
@@ -170,8 +170,10 @@ async function addUser(uid, token,time, nickname,img,target){
   const query = await callDB(DB, `SELECT * from kakao WHERE user_id='${uid}'`,(index,data)=>{
     if(index==0){
       if(data && data.length)
-        return `UPDATE user_data SET user_uuid='${uuid}', user_name='${nickname}', user_img='${img}' WHERE user_id='${uid}';UPDATE kakao SET refresh_token='${token}', user_uuid='${uuid}', expires_in=now() + '${time} second' WHERE user_id='${uid}';`;
-      else return `INSERT INTO user_data (user_name, user_img, user_id,user_uuid) VALUES ('${nickname || "닉네임이 지정되지 않음"}', '${img || "http://placehold.it/640x640"}', '${uid}', '${uuid}');INSERT INTO kakao (refresh_token, expires_in, user_id, target,user_uuid) VALUES ('${token}',  now() + '${time} second', '${uid}', '${target}','${uuid}')`;
+        return `UPDATE user_data SET user_uuid='${uuid}', user_name='${nickname}', user_img='${img}' WHERE user_id='${uid}';
+          UPDATE kakao SET refresh_token='${token}', user_uuid='${uuid}', expires_in=now() + '${time} second' WHERE user_id='${uid}';`;
+      else return `INSERT INTO user_data (user_name, user_img, user_id,user_uuid) VALUES ('${nickname || "닉네임이 지정되지 않음"}', '${img || "http://placehold.it/640x640"}', '${uid}', '${uuid}');
+          INSERT INTO kakao (refresh_token, expires_in, user_id, target,user_uuid) VALUES ('${token}',  now() + '${time} second', '${uid}', '${target}','${uuid}')`;
     }else return false; // 다른쿼리는 처리하지 않음
   });
   return uuid;

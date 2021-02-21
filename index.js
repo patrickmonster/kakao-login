@@ -4,7 +4,6 @@ const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 
 const helmet = require("helmet");
-
 const logger = require("./js/winston"); //로그용
 
 const app = express();
@@ -19,7 +18,7 @@ const passportRouter = require("./js/passport") // 사용자 인증 관련
 const db = require("./js/db"); // 디비 / 사용자 API
 const loadRouter = require("./js/content/load");// 단어 검색 / 문장 검색
 
-var firebase = require('firebase');
+const firebase = require('firebase');
 firebase.initializeApp(db.firebaseConfig);
 
 firebase.auth().onAuthStateChanged((firebaseUser) => {//파이어베이스
@@ -45,6 +44,7 @@ app.get("/", (req, res, next) => { // 매인화면
   }
 });
 
+// 무조건 해더 기록
 app.use((req,res,next)=>{
   logger.http(`${JSON.stringify(req.headers)} BODY : ${JSON.stringify(req.body)}`);// 헤더 기록
   next();
@@ -56,12 +56,7 @@ app.use('/', loadRouter);// 단어검색
 
 //사용자 생성
 app.get("/create", (req, res, next) => {
-  if (req.query.client !== db.client_id)
-    return res.sendFile(__dirname + "/html/create.html");
-  var data = db.func.newUser(res);
-  data.then(d=>{
-    res.end(`사용자 생성됨 : ${d.id} ${d.token}`);
-  });
+  res.sendFile(__dirname + "/html/create.html");
 });
 
 // 기본 이미지 취득
@@ -75,6 +70,6 @@ app.get("/img", (req, res, next) => {
 
 
 
-app.listen(3000, () => {
-  logger.info("start server 3000port");
+app.listen(80, () => {
+  logger.info("start server 80port");
 });
