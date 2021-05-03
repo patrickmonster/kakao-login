@@ -9,11 +9,6 @@ const axios = require("axios");
 
 //데이터베이스용
 const DB = {
-  user: "postgres",
-  host: "101.101.162.238",
-  database: "danmooji_dev",
-  password: "!xper@2",
-  port: 5432,
 };
 
 // 딕셔너리 오브젝트 key값 변경
